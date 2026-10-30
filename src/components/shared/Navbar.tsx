@@ -14,7 +14,7 @@ import {
 const navLinks = [
   { name: "Home", href: "/" },
   { name: "All Books", href: "/books" },
-  { name: "Add Book", href: "/books/add" },
+  { name: "Add Book", href: "/add-book" },
   { name: "My Books", href: "/my-books" },
   { name: "My Borrows", href: "/my-borrows" },
 ];
