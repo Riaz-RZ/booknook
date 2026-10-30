@@ -2,6 +2,7 @@ import { Suspense } from "react";
 
 import Banner from "@/components/home/Banner";
 import HowBorrowingWorks from "@/components/home/HowBorrowingWorks";
+import ReaderReviews from "@/components/home/ReaderReviews";
 
 
 export default function Home() {
@@ -13,6 +14,7 @@ export default function Home() {
     >
       <Banner />
       <HowBorrowingWorks/>
+      <ReaderReviews/>
     </Suspense>
   );
 }

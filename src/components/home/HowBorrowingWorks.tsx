@@ -33,7 +33,7 @@ const HowBorrowingWorks = () => {
             SIMPLE PROCESS
           </p>
           <h2 className="mt-2 text-3xl font-bold text-slate-900 md:text-4xl">
-            How BookNook Works
+            <span className="text-emerald-600">How</span> BookNook Works
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-slate-500">
             Getting your favorite book has never been easier.
