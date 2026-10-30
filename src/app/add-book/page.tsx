@@ -180,7 +180,7 @@ const AddBookPage = () => {
                                         onValueChange={(value) =>
                                             setFormData((prev) => ({
                                                 ...prev,
-                                                category: value,
+                                                category: value ?? "",
                                             }))
                                         }
                                         required
