@@ -49,24 +49,28 @@ export default function Navbar() {
 
         {/* Authentication Buttons */}
         <div className="hidden items-center gap-3 md:flex">
-          <Button variant="outline">
-            <Link href="/login">Login</Link>
+          <Button
+            variant="outline"
+            nativeButton={false}
+            render={<Link href="/login" />}
+          >
+            Login
           </Button>
 
           <Button
             className="bg-emerald-700 hover:bg-emerald-800"
+            nativeButton={false}
+            render={<Link href="/register" />}
           >
-            <Link href="/register">Register</Link>
+            Register
           </Button>
         </div>
 
         {/* Mobile Navigation */}
         <div className="md:hidden">
           <Sheet>
-            <SheetTrigger>
-              <Button variant="outline" size="icon">
-                <Menu size={22} />
-              </Button>
+            <SheetTrigger render={<Button variant="outline" size="icon" />}>
+              <Menu size={22} />
             </SheetTrigger>
 
             <SheetContent side="right" className="w-72">
@@ -91,15 +95,20 @@ export default function Navbar() {
                 ))}
 
                 <div className="mt-3 flex flex-col gap-3">
-                  <Button variant="outline">
-                    <Link href="/login">Login</Link>
+                  <Button
+                    variant="outline"
+                    nativeButton={false}
+                    render={<Link href="/login" />}
+                  >
+                    Login
                   </Button>
 
                   <Button
-
                     className="bg-emerald-700 hover:bg-emerald-800"
+                    nativeButton={false}
+                    render={<Link href="/register" />}
                   >
-                    <Link href="/register">Register</Link>
+                    Register
                   </Button>
                 </div>
               </div>

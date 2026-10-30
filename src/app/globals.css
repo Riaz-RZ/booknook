@@ -128,3 +128,22 @@
     @apply font-sans;
   }
 }
+
+
+/* BookNook Swiper Pagination */
+.booknook-slider .swiper-pagination {
+  bottom: 20px !important;
+}
+
+.booknook-slider .swiper-pagination-bullet {
+  background: white;
+  opacity: 0.6;
+  width: 9px;
+  height: 9px;
+}
+
+.booknook-slider .swiper-pagination-bullet-active {
+  opacity: 1;
+  width: 25px;
+  border-radius: 10px;
+}

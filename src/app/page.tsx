@@ -1,9 +1,16 @@
+import { Suspense } from "react";
+
+import Banner from "@/components/shared/Banner";
 
 
 export default function Home() {
   return (
-<div>
-  <h1>hello world</h1>
-</div>
+    <Suspense
+      fallback={
+        <div className="mx-auto min-h-105 max-w-7xl px-4 pt-6 md:min-h-130 lg:px-8" />
+      }
+    >
+      <Banner />
+    </Suspense>
   );
 }

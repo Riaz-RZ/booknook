@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Josefin_Sans } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/Navbar";
+import Navbar from "@/components/shared/Navbar";
 
 const josefinsans = Josefin_Sans({
   subsets: ["latin"],
