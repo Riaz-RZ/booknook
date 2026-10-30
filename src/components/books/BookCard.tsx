@@ -8,6 +8,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { BookOpen, UserRound } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 
 interface BookCardProps {
   book: Ibook;
@@ -59,7 +60,12 @@ const BookCard = ({ book }: BookCardProps) => {
       </CardContent>
 
       <CardFooter className="px-5 pb-5">
-        <Button className="w-full" variant="outline">
+        <Button
+          className="w-full"
+          variant="outline"
+          nativeButton={false}
+          render={<Link href={`/books/${book._id}`} />}
+        >
           View Details
         </Button>
       </CardFooter>
