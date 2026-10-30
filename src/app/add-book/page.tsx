@@ -52,15 +52,6 @@ const AddBookPage = () => {
     // Handle form submission
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        const res = await fetch('http://localhost:8000/books', {
-            method: 'POST',
-            headers: {
-                'Content-Type': "application/json"
-            },
-            body: JSON.stringify(formData)
-        })
-        const data = await res.json()
-        console.log(data);
 
         if (!imageFile) {
             toast.error("Please upload a book image.");
@@ -70,7 +61,28 @@ const AddBookPage = () => {
         setLoading(true);
 
         try {
-            // TODO: Upload image to imgbb and save book to MongoDB.
+            const image = await new Promise<string>((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result as string);
+                reader.onerror = () => reject(reader.error);
+                reader.readAsDataURL(imageFile);
+            });
+
+            const res = await fetch("http://localhost:8000/books", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    ...formData,
+                    copies: Number(formData.copies),
+                    image,
+                }),
+            });
+
+            if (!res.ok) {
+                throw new Error("Failed to save the book");
+            }
 
             toast.success("Book added successfully!");
 
