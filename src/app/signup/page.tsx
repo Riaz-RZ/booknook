@@ -102,7 +102,7 @@ export default function SignUpPage() {
                                 />
                             </Field>
                             <Field>
-                                <FieldLabel htmlFor="name">ImageURL</FieldLabel>
+                                <FieldLabel htmlFor="image">Image URL</FieldLabel>
                                 <Input
                                     id="image"
                                     type="url"
