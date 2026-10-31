@@ -60,7 +60,7 @@ export default function Navbar() {
           <Button
             className="bg-emerald-700 hover:bg-emerald-800"
             nativeButton={false}
-            render={<Link href="/register" />}
+            render={<Link href="/signup" />}
           >
             Register
           </Button>
