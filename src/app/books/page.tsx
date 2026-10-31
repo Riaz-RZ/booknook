@@ -13,6 +13,16 @@ const AllBooksPage = async () => {
   }
 
   const booksData: Ibook[] = await res.json();
+  const newestFirst = [...booksData].sort((a, b) => {
+    const firstDate = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+    const secondDate = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+
+    if (firstDate !== secondDate) {
+      return secondDate - firstDate;
+    }
+
+    return b._id.localeCompare(a._id);
+  });
 
   return (
     <section className="min-h-screen bg-muted/30 px-4 py-12">
@@ -29,14 +39,14 @@ const AllBooksPage = async () => {
           </p>
 
           <p className="mt-2 text-sm font-medium text-primary">
-            {booksData.length} Books Available
+            {newestFirst.length} Books Available
           </p>
         </div>
 
         {/* Books Grid */}
-        {booksData.length > 0 ? (
+        {newestFirst.length > 0 ? (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {booksData.map((book) => (
+            {newestFirst.map((book) => (
               <BookCard key={book._id} book={book} />
             ))}
           </div>

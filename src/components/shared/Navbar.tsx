@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 import {
   BookOpen,
@@ -41,6 +41,7 @@ const navLinks = [
 
 export default function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -57,6 +58,8 @@ export default function Navbar() {
   const handleSignout = async () => {
     await authClient.signOut();
     setMobileMenuOpen(false);
+    router.push("/");
+    router.refresh();
   };
 
   // Active Navigation Link

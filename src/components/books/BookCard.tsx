@@ -1,4 +1,6 @@
 
+"use client";
+
 import { Ibook } from "@/lib/types/books";
 import {
   Card,
@@ -9,12 +11,18 @@ import { Button } from "@/components/ui/button";
 import { BookOpen, UserRound } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { authClient } from "@/lib/auth-client";
 
 interface BookCardProps {
   book: Ibook;
 }
 
 const BookCard = ({ book }: BookCardProps) => {
+  const { data: session, isPending } = authClient.useSession();
+  const detailsHref = session
+    ? `/books/${book._id}`
+    : `/login?callbackUrl=${encodeURIComponent(`/books/${book._id}`)}`;
+
   return (
     <Card className="group overflow-hidden pt-0 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
       {/* Book Image */}
@@ -64,7 +72,8 @@ const BookCard = ({ book }: BookCardProps) => {
           className="w-full"
           variant="outline"
           nativeButton={false}
-          render={<Link href={`/books/${book._id}`} />}
+          render={<Link href={detailsHref} />}
+          disabled={isPending}
         >
           View Details
         </Button>

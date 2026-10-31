@@ -7,5 +7,6 @@ export interface Ibook {
     description: string,
     userName: string,
     userEmail: string,
-    image: string
+    image: string,
+    createdAt?: string
 }

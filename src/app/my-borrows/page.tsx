@@ -32,6 +32,8 @@ const myBorrowsPage = async() => {
     })
     const borrows: Borrow[] = res.ok ? await res.json() : []
 
+    console.log(borrows);
+
     return (
         <div className="mx-auto min-h-screen max-w-6xl px-4 py-10">
             <h1 className="mb-6 text-3xl font-bold">My Borrowed Books</h1>

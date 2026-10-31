@@ -66,7 +66,8 @@ export default function SignUpPage() {
             return
         }
 
-        router.push("/login")
+        await authClient.signOut()
+        router.replace("/login")
         router.refresh()
     }
 

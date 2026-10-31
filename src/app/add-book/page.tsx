@@ -22,10 +22,12 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { authClient } from "@/lib/auth-client";
 
 const AddBookPage = () => {
     const [loading, setLoading] = useState(false);
     const [imageFile, setImageFile] = useState<File | null>(null);
+    const { data: session } = authClient.useSession();
 
     const [formData, setFormData] = useState({
         title: "",
@@ -77,6 +79,8 @@ const AddBookPage = () => {
                     ...formData,
                     copies: Number(formData.copies),
                     image,
+                    userName: session?.user.name ?? formData.userName,
+                    userEmail: session?.user.email ?? formData.userEmail,
                 }),
             });
 
@@ -275,7 +279,7 @@ const AddBookPage = () => {
                                     <Input
                                         id="userName"
                                         name="userName"
-                                        value={formData.userName}
+                                        value={session?.user.name ?? ""}
                                         readOnly
                                         placeholder="Not available yet"
                                         className="bg-background"
@@ -289,7 +293,7 @@ const AddBookPage = () => {
                                         id="userEmail"
                                         name="userEmail"
                                         type="email"
-                                        value={formData.userEmail}
+                                        value={session?.user.email ?? ""}
                                         readOnly
                                         placeholder="Not available yet"
                                         className="bg-background"
