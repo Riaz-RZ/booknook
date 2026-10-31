@@ -19,6 +19,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import Image from "next/image";
+import BorrowBooksButton from "@/components/books/BorrowBooksButton";
 
 interface BookDetailsPageProps {
   params: Promise<{
@@ -91,6 +92,17 @@ const BookDetailsPage = async ({ params }: BookDetailsPageProps) => {
                 </div>
 
                 <Separator />
+                {/* Description */}
+                <div className="space-y-3">
+                  <h2 className="text-xl font-semibold">
+                    About This Book
+                  </h2>
+
+                  <p className="text-sm leading-7 text-muted-foreground sm:text-base">
+                    {book.description}
+                  </p>
+                </div>
+                <Separator />
 
                 {/* Availability */}
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -125,16 +137,7 @@ const BookDetailsPage = async ({ params }: BookDetailsPageProps) => {
                   </div>
                 </div>
 
-                {/* Description */}
-                <div className="space-y-3">
-                  <h2 className="text-xl font-semibold">
-                    About This Book
-                  </h2>
 
-                  <p className="text-sm leading-7 text-muted-foreground sm:text-base">
-                    {book.description}
-                  </p>
-                </div>
 
                 <Separator />
 
@@ -163,8 +166,12 @@ const BookDetailsPage = async ({ params }: BookDetailsPageProps) => {
                     </div>
                   </div>
                 </div>
-
+                {/* Borrow Book */}
+                <div className="pt-2">
+                  <BorrowBooksButton book={book}/>
+                </div>
               </div>
+
             </div>
           </CardContent>
         </Card>
