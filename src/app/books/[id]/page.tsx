@@ -35,7 +35,7 @@ const BookDetailsPage = async ({ params }: BookDetailsPageProps) => {
   const token = await getTokenFromServer()
 
 
-  const res = await fetch(`http://localhost:8000/book/${id}`, {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/book/${id}`, {
     cache: "no-store",
     headers: {
       authorization: `Bearer ${token}`,

@@ -6,7 +6,7 @@ import { Ibook } from "@/lib/types/books";
 
 const NewArrivals = async () => {
   const res = await fetch(
-    "http://localhost:8000/books?sort=createdAt&order=desc&limit=6",
+    `${process.env.NEXT_PUBLIC_API_URL}/books?sort=createdAt&order=desc&limit=6`,
     { cache: "no-store" }
   );
 

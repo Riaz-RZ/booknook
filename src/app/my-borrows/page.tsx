@@ -48,7 +48,7 @@ const MyBorrowsPage = async () => {
   const token = await getTokenFromServer();
 
   const res = await fetch(
-    `http://localhost:8000/borrows/${encodeURIComponent(user.email)}`,
+    `${process.env.NEXT_PUBLIC_API_URL}/borrows/${encodeURIComponent(user.email)}`,
     {
       cache: "no-store",
       headers: {
