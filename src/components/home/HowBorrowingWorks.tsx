@@ -26,21 +26,26 @@ const steps = [
 
 const HowBorrowingWorks = () => {
   return (
-    <section className="bg-white px-4 py-16 sm:px-6 lg:px-8">
+    <section className="w-full  bg-navy px-4 py-16 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
+
+        {/* Section Heading */}
         <div className="mb-12 text-center">
-          <p className="font-semibold text-emerald-600">
-            SIMPLE PROCESS
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-400">
+            Simple Process
           </p>
-          <h2 className="mt-2 text-3xl font-bold text-slate-900 md:text-4xl">
-            <span className="text-emerald-600">How</span> BookNook Works
+
+          <h2 className="mt-3 text-3xl font-bold text-white md:text-4xl">
+            How <span className="text-emerald-400">BookNook</span> Works
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-slate-500">
+
+          <p className="mx-auto mt-4 max-w-2xl leading-7 text-gray-400">
             Getting your favorite book has never been easier.
             Follow these three simple steps.
           </p>
         </div>
 
+        {/* Steps */}
         <div className="grid gap-8 md:grid-cols-3">
           {steps.map((step) => {
             const Icon = step.icon;
@@ -48,21 +53,25 @@ const HowBorrowingWorks = () => {
             return (
               <div
                 key={step.number}
-                className="rounded-2xl border border-slate-100 bg-slate-50 p-8 text-center transition hover:-translate-y-2 hover:shadow-lg"
+                className="group rounded-2xl border border-gray-700 bg-navy-card p-8 text-center transition-all duration-300 hover:-translate-y-2 hover:border-emerald-500/50 hover:shadow-xl hover:shadow-emerald-500/5"
               >
-                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600">
+                {/* Icon */}
+                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-400 transition-all duration-300 group-hover:bg-emerald-500 group-hover:text-navy">
                   <Icon size={30} />
                 </div>
 
-                <p className="mt-5 text-sm font-bold text-emerald-600">
+                {/* Step Number */}
+                <p className="mt-6 text-xs font-bold tracking-widest text-emerald-400">
                   STEP {step.number}
                 </p>
 
-                <h3 className="mt-2 text-xl font-bold text-slate-900">
+                {/* Title */}
+                <h3 className="mt-3 text-xl font-bold text-white">
                   {step.title}
                 </h3>
 
-                <p className="mt-3 text-sm leading-7 text-slate-500">
+                {/* Description */}
+                <p className="mt-3 text-sm leading-7 text-gray-400">
                   {step.description}
                 </p>
               </div>

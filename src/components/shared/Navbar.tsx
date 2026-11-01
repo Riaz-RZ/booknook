@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -49,10 +48,10 @@ export default function Navbar() {
   const user = session?.user;
 
   const visibleNavLinks = user
-  ? navLinks
-  : navLinks.filter(
-      (link) => link.href === "/" || link.href === "/books"
-    );
+    ? navLinks
+    : navLinks.filter(
+        (link) => link.href === "/" || link.href === "/books"
+      );
 
   // Sign Out
   const handleSignout = async () => {
@@ -64,39 +63,37 @@ export default function Navbar() {
 
   // Active Navigation Link
   const isActive = (href: string) => {
-    if (href === "/") {
-      return pathname === "/";
-    }
+    if (href === "/") return pathname === "/";
 
     return pathname === href || pathname.startsWith(`${href}/`);
   };
 
   // Navigation Link Styling
   const getLinkClass = (href: string) => {
-    return `text-sm font-medium transition-colors ${
+    return `rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 ${
       isActive(href)
-        ? "text-emerald-700"
-        : "text-gray-600 hover:text-emerald-700"
+        ? "bg-emerald-500/10 text-emerald-400"
+        : "text-gray-300 hover:bg-white/5 hover:text-emerald-400"
     }`;
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur">
+    <header className="sticky top-0 z-50 w-full border-b border-gray-800 bg-navy-dark/95 backdrop-blur-xl">
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 lg:px-8">
 
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
-          <div className="rounded-lg bg-emerald-700 p-2 text-white">
+          <div className="rounded-lg bg-emerald-primary p-2 text-navy">
             <BookOpen size={23} />
           </div>
 
-          <span className="text-xl font-bold text-emerald-800">
-            BookNook
+          <span className="text-xl font-bold tracking-wide text-white">
+            Book<span className="text-emerald-400">Nook</span>
           </span>
         </Link>
 
         {/* Desktop Navigation */}
-        <div className="hidden items-center gap-6 md:flex">
+        <div className="hidden items-center gap-2 md:flex">
           {visibleNavLinks.map((link) => (
             <Link
               key={link.name}
@@ -117,7 +114,7 @@ export default function Navbar() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="rounded-full"
+                    className="rounded-full hover:bg-white/10 cursor-pointer"
                   />
                 }
               >
@@ -127,13 +124,16 @@ export default function Navbar() {
                     referrerPolicy="no-referrer"
                   />
 
-                  <AvatarFallback>
+                  <AvatarFallback className="bg-emerald-500 text-navy font-semibold">
                     {user.name?.charAt(0)?.toUpperCase() ?? "U"}
                   </AvatarFallback>
                 </Avatar>
               </PopoverTrigger>
 
-              <PopoverContent align="end" className="w-56">
+              <PopoverContent
+                align="end"
+                className="w-56 border-gray-700 bg-navy-card text-gray-100"
+              >
                 <PopoverHeader>
                   <PopoverTitle>{user.name}</PopoverTitle>
                 </PopoverHeader>
@@ -141,18 +141,20 @@ export default function Navbar() {
                 <div className="mt-3 space-y-2">
                   <Button
                     variant="outline"
-                    className="w-full justify-start"
+                    className="w-full justify-start border-gray-600 bg-transparent hover:bg-white/10  cursor-pointer"
+
                   >
                     <Link href="/profile">
-                      <UserRound className="mr-2 h-4 w-4" />
+                    
                       My Profile
+                      
                     </Link>
                   </Button>
 
                   <Button
                     onClick={handleSignout}
                     variant="destructive"
-                    className="w-full"
+                    className="w-full  cursor-pointer"
                   >
                     <LogOut className="mr-2 h-4 w-4" />
                     Sign Out
@@ -162,12 +164,17 @@ export default function Navbar() {
             </Popover>
           ) : (
             <>
-              <Button variant="outline">
+              <Button
+                variant="outline"
+                className="border-gray-600 bg-transparent text-gray-200 hover:border-emerald-500 hover:bg-emerald-500/10 hover:text-emerald-400"
+
+              >
                 <Link href="/login">Login</Link>
               </Button>
 
               <Button
-                className="bg-emerald-700 hover:bg-emerald-800"
+                className="bg-emerald-primary font-semibold text-navy hover:bg-emerald-hover"
+
               >
                 <Link href="/signup">Register</Link>
               </Button>
@@ -183,23 +190,32 @@ export default function Navbar() {
           >
             <SheetTrigger
               render={
-                <Button variant="outline" size="icon" />
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="border-gray-700 bg-transparent text-gray-200 hover:bg-white/10"
+                />
               }
             >
               <Menu size={22} />
             </SheetTrigger>
 
-            <SheetContent side="right" className="w-72">
+            <SheetContent
+              side="right"
+              className="w-72 border-gray-800 bg-navy text-gray-100"
+            >
               <div className="mt-8 flex flex-col gap-5">
 
                 {/* Mobile Logo */}
                 <Link
                   href="/"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="mb-3 flex items-center gap-2 text-xl font-bold text-emerald-800"
+                  className="mb-3 flex items-center gap-2 text-xl font-bold"
                 >
-                  <BookOpen size={24} />
-                  BookNook
+                  <BookOpen size={24} className="text-emerald-400" />
+                  <span>
+                    Book<span className="text-emerald-400">Nook</span>
+                  </span>
                 </Link>
 
                 {/* Mobile Navigation Links */}
@@ -219,14 +235,14 @@ export default function Navbar() {
                   {user ? (
                     <>
                       {/* User Information */}
-                      <div className="flex items-center gap-3 rounded-lg bg-muted p-3">
+                      <div className="flex items-center gap-3 rounded-lg border border-gray-700 bg-navy-card p-3">
                         <Avatar>
                           <AvatarImage
                             src={user.image ?? ""}
                             referrerPolicy="no-referrer"
                           />
 
-                          <AvatarFallback>
+                          <AvatarFallback className="bg-emerald-500 text-navy">
                             {user.name?.charAt(0)?.toUpperCase() ?? "U"}
                           </AvatarFallback>
                         </Avatar>
@@ -236,14 +252,18 @@ export default function Navbar() {
                             {user.name}
                           </p>
 
-                          <p className="truncate text-xs text-muted-foreground">
+                          <p className="truncate text-xs text-gray-400">
                             {user.email}
                           </p>
                         </div>
                       </div>
 
                       {/* Profile */}
-                      <Button variant="outline">
+                      <Button
+                        variant="outline"
+                        className="w-full border-gray-600 bg-transparent hover:bg-white/10"
+
+                      >
                         <Link
                           href="/profile"
                           onClick={() => setMobileMenuOpen(false)}
@@ -264,7 +284,10 @@ export default function Navbar() {
                     </>
                   ) : (
                     <>
-                      <Button variant="outline">
+                      <Button
+                        variant="outline"
+                        className="w-full border-gray-600 bg-transparent hover:bg-white/10"
+                      >
                         <Link
                           href="/login"
                           onClick={() => setMobileMenuOpen(false)}
@@ -274,7 +297,7 @@ export default function Navbar() {
                       </Button>
 
                       <Button
-                        className="bg-emerald-700 hover:bg-emerald-800"
+                        className="w-full bg-emerald-primary text-navy hover:bg-emerald-hover"
                       >
                         <Link
                           href="/signup"
@@ -290,7 +313,6 @@ export default function Navbar() {
             </SheetContent>
           </Sheet>
         </div>
-
       </nav>
     </header>
   );

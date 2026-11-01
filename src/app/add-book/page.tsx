@@ -4,9 +4,9 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import {
-    BookOpen,
-    ImagePlus,
-    Loader2,
+  BookOpen,
+  ImagePlus,
+  Loader2,
 } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
@@ -16,21 +16,88 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
+
 import { authClient } from "@/lib/auth-client";
 import { getTokenFromClient } from "@/lib/getTokenFromClient";
 
 const AddBookPage = () => {
-    const [loading, setLoading] = useState(false);
-    const [imageFile, setImageFile] = useState<File | null>(null);
-    const { data: session } = authClient.useSession();
+  const [loading, setLoading] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
-    const [formData, setFormData] = useState({
+  const { data: session } = authClient.useSession();
+
+  const [formData, setFormData] = useState({
+    title: "",
+    author: "",
+    category: "",
+    copies: "",
+    description: "",
+    userName: "",
+    userEmail: "",
+  });
+
+  // Handle text and number inputs
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  // Handle form submission
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (!imageFile) {
+      toast.error("Please upload a book image.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const image = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(imageFile);
+      });
+
+      const token = await getTokenFromClient();
+
+      const res = await fetch("http://localhost:8000/books", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          ...formData,
+          copies: Number(formData.copies),
+          image,
+          userName: session?.user.name ?? formData.userName,
+          userEmail: session?.user.email ?? formData.userEmail,
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to save the book");
+      }
+
+      toast.success("Book added successfully!");
+
+      // Reset form
+      setFormData({
         title: "",
         author: "",
         category: "",
@@ -38,301 +105,259 @@ const AddBookPage = () => {
         description: "",
         userName: "",
         userEmail: "",
-    });
+      });
 
-    // Handle text and number inputs
-    const handleChange = (
-        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-    ) => {
-        const { name, value } = e.target;
+      setImageFile(null);
 
-        setFormData((prev) => ({
-            ...prev,
-            [name]: value,
-        }));
-    };
+      const fileInput = document.getElementById(
+        "bookImage"
+      ) as HTMLInputElement;
 
-    // Handle form submission
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
+      if (fileInput) {
+        fileInput.value = "";
+      }
+    } catch (error) {
+      console.error("Error adding book:", error);
+      toast.error("Failed to add book. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        if (!imageFile) {
-            toast.error("Please upload a book image.");
-            return;
-        }
+  return (
+    <section className="min-h-screen w-full bg-[#151F32] px-4 py-12 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-3xl">
 
-        setLoading(true);
+        {/* Page Heading */}
+        <div className="mb-10 text-center">
+          <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl border border-emerald-500/20 bg-emerald-500/10">
+            <BookOpen className="h-8 w-8 text-emerald-400" />
+          </div>
 
-        try {
-            const image = await new Promise<string>((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = () => resolve(reader.result as string);
-                reader.onerror = () => reject(reader.error);
-                reader.readAsDataURL(imageFile);
-            });
+          <p className="mb-3 text-sm font-semibold uppercase tracking-[0.2em] text-emerald-400">
+            Expand Our Collection
+          </p>
 
-            const token = await getTokenFromClient()
+          <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
+            Add a New <span className="text-emerald-400">Book</span>
+          </h1>
 
-            const res = await fetch("http://localhost:8000/books", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    authorization: `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                    ...formData,
-                    copies: Number(formData.copies),
-                    image,
-                    userName: session?.user.name ?? formData.userName,
-                    userEmail: session?.user.email ?? formData.userEmail,
-                }),
-            });
+          <p className="mt-3 text-gray-400">
+            Share your favorite books with the BookNook community.
+          </p>
+        </div>
 
-            if (!res.ok) {
-                throw new Error("Failed to save the book");
-            }
+        {/* Form Card */}
+        <Card className="border-gray-700 bg-navy-card shadow-xl shadow-black/10">
+          <CardContent className="pt-6">
+            <form onSubmit={handleSubmit} className="space-y-7">
 
-            toast.success("Book added successfully!");
+              {/* Book Title & Author */}
+              <div className="grid gap-5 sm:grid-cols-2">
 
-            // Reset form
-            setFormData({
-                title: "",
-                author: "",
-                category: "",
-                copies: "",
-                description: "",
-                userName: "",
-                userEmail: "",
-            });
+                <div className="space-y-2">
+                  <Label htmlFor="title" className="text-gray-200">
+                    Book Title
+                  </Label>
 
-            setImageFile(null);
-
-            const fileInput = document.getElementById(
-                "bookImage"
-            ) as HTMLInputElement;
-
-            if (fileInput) {
-                fileInput.value = "";
-            }
-        } catch (error) {
-            console.error("Error adding book:", error);
-            toast.error("Failed to add book. Please try again.");
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    return (
-        <section className="min-h-screen bg-muted/30 px-4 py-10">
-            <div className="mx-auto max-w-3xl">
-
-                {/* Page Heading */}
-                <div className="mb-8 text-center">
-                    <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10">
-                        <BookOpen className="h-7 w-7 text-primary" />
-                    </div>
-
-                    <h1 className="text-3xl font-bold tracking-tight">
-                        Add a New Book
-                    </h1>
-
-                    <p className="mt-2 text-muted-foreground">
-                        Share your favorite books with the BookNook community.
-                    </p>
+                  <Input
+                    id="title"
+                    name="title"
+                    placeholder="Enter book title"
+                    value={formData.title}
+                    onChange={handleChange}
+                    required
+                    className="border-gray-600 bg-navy text-white placeholder:text-gray-500 focus-visible:border-emerald-500"
+                  />
                 </div>
 
-                {/* Form Card */}
-                <Card className="border-border/60 shadow-sm">
-                    <CardContent className="pt-6">
-                        <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="author" className="text-gray-200">
+                    Author Name
+                  </Label>
 
-                            {/* Book Title & Author */}
-                            <div className="grid gap-5 sm:grid-cols-2">
+                  <Input
+                    id="author"
+                    name="author"
+                    placeholder="Enter author name"
+                    value={formData.author}
+                    onChange={handleChange}
+                    required
+                    className="border-gray-600 bg-navy text-white placeholder:text-gray-500 focus-visible:border-emerald-500"
+                  />
+                </div>
 
-                                <div className="space-y-2">
-                                    <Label htmlFor="title">Book Title</Label>
+              </div>
 
-                                    <Input
-                                        id="title"
-                                        name="title"
-                                        placeholder="Enter book title"
-                                        value={formData.title}
-                                        onChange={handleChange}
-                                        required
-                                    />
-                                </div>
+              {/* Category & Number of Copies */}
+              <div className="grid gap-5 sm:grid-cols-2">
 
-                                <div className="space-y-2">
-                                    <Label htmlFor="author">Author Name</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="category" className="text-gray-200">
+                    Category
+                  </Label>
 
-                                    <Input
-                                        id="author"
-                                        name="author"
-                                        placeholder="Enter author name"
-                                        value={formData.author}
-                                        onChange={handleChange}
-                                        required
-                                    />
-                                </div>
+                  <Select
+                    value={formData.category}
+                    onValueChange={(value) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        category: value ?? "",
+                      }))
+                    }
+                    required
+                  >
+                    <SelectTrigger
+                      id="category"
+                      className="w-full border-gray-600 bg-navy text-white"
+                    >
+                      <SelectValue placeholder="Select book category" />
+                    </SelectTrigger>
 
-                            </div>
+                    <SelectContent className="border-gray-700 bg-navy-card text-white">
+                      <SelectItem value="Fiction">Fiction</SelectItem>
+                      <SelectItem value="Science">Science</SelectItem>
+                      <SelectItem value="History">History</SelectItem>
+                      <SelectItem value="Kids">Kids</SelectItem>
+                      <SelectItem value="Others">Others</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
-                            {/* Category & Number of Copies */}
-                            <div className="grid gap-5 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="copies" className="text-gray-200">
+                    Number of Copies
+                  </Label>
 
-                                <div className="space-y-2">
-                                    <Label htmlFor="category">Category</Label>
+                  <Input
+                    id="copies"
+                    name="copies"
+                    type="number"
+                    min="1"
+                    step="1"
+                    placeholder="Enter number of copies"
+                    value={formData.copies}
+                    onChange={handleChange}
+                    required
+                    className="border-gray-600 bg-navy text-white placeholder:text-gray-500 focus-visible:border-emerald-500"
+                  />
+                </div>
 
-                                    <Select
-                                        value={formData.category}
-                                        onValueChange={(value) =>
-                                            setFormData((prev) => ({
-                                                ...prev,
-                                                category: value ?? "",
-                                            }))
-                                        }
-                                        required
-                                    >
-                                        <SelectTrigger id="category" className="w-full">
-                                            <SelectValue placeholder="Select book category" />
-                                        </SelectTrigger>
+              </div>
 
-                                        <SelectContent>
-                                            <SelectItem value="Fiction">Fiction</SelectItem>
-                                            <SelectItem value="Science">Science</SelectItem>
-                                            <SelectItem value="History">History</SelectItem>
-                                            <SelectItem value="Kids">Kids</SelectItem>
-                                            <SelectItem value="Others">Others</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
+              {/* Book Image */}
+              <div className="space-y-2">
+                <Label htmlFor="bookImage" className="text-gray-200">
+                  Book Image
+                </Label>
 
-                                <div className="space-y-2">
-                                    <Label htmlFor="copies">Number of Copies</Label>
+                <label
+                  htmlFor="bookImage"
+                  className="flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-600 bg-navy/50 p-8 text-center transition hover:border-emerald-500 hover:bg-emerald-500/5"
+                >
+                  <ImagePlus className="mb-3 h-10 w-10 text-emerald-400" />
 
-                                    <Input
-                                        id="copies"
-                                        name="copies"
-                                        type="number"
-                                        min="1"
-                                        step="1"
-                                        placeholder="Enter number of copies"
-                                        value={formData.copies}
-                                        onChange={handleChange}
-                                        required
-                                    />
-                                </div>
+                  <span className="font-medium text-gray-200">
+                    {imageFile
+                      ? imageFile.name
+                      : "Click to upload book cover"}
+                  </span>
 
-                            </div>
+                  <span className="mt-2 text-sm text-gray-500">
+                    PNG, JPG or WEBP
+                  </span>
+                </label>
 
-                            {/* Book Image */}
-                            <div className="space-y-2">
-                                <Label htmlFor="bookImage">Book Image</Label>
+                <Input
+                  id="bookImage"
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  className="hidden"
+                  onChange={(e) =>
+                    setImageFile(e.target.files?.[0] ?? null)
+                  }
+                />
+              </div>
 
-                                <label
-                                    htmlFor="bookImage"
-                                    className="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-border p-8 text-center transition hover:border-primary hover:bg-primary/5"
-                                >
-                                    <ImagePlus className="mb-3 h-9 w-9 text-muted-foreground" />
+              {/* Short Description */}
+              <div className="space-y-2">
+                <Label htmlFor="description" className="text-gray-200">
+                  Short Description
+                </Label>
 
-                                    <span className="font-medium">
-                                        {imageFile
-                                            ? imageFile.name
-                                            : "Click to upload book cover"}
-                                    </span>
+                <Textarea
+                  id="description"
+                  name="description"
+                  placeholder="Write a short description about this book..."
+                  value={formData.description}
+                  onChange={handleChange}
+                  rows={4}
+                  required
+                  className="resize-none border-gray-600 bg-navy text-white placeholder:text-gray-500 focus-visible:border-emerald-500"
+                />
+              </div>
 
-                                    <span className="mt-1 text-sm text-muted-foreground">
-                                        PNG, JPG or WEBP
-                                    </span>
-                                </label>
+              {/* User Information */}
+              <div className="grid gap-5 rounded-xl border border-gray-700 bg-navy/70 p-5 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="userName" className="text-gray-300">
+                    User Name
+                  </Label>
 
-                                <Input
-                                    id="bookImage"
-                                    type="file"
-                                    accept="image/png,image/jpeg,image/webp"
-                                    className="hidden"
-                                    onChange={(e) =>
-                                        setImageFile(e.target.files?.[0] ?? null)
-                                    }
-                                />
-                            </div>
+                  <Input
+                    id="userName"
+                    name="userName"
+                    value={session?.user.name ?? ""}
+                    readOnly
+                    placeholder="Not available yet"
+                    className="border-gray-700 bg-navy-card text-gray-400"
+                  />
+                </div>
 
-                            {/* Short Description */}
-                            <div className="space-y-2">
-                                <Label htmlFor="description">
-                                    Short Description
-                                </Label>
+                <div className="space-y-2">
+                  <Label htmlFor="userEmail" className="text-gray-300">
+                    Email Address
+                  </Label>
 
-                                <Textarea
-                                    id="description"
-                                    name="description"
-                                    placeholder="Write a short description about this book..."
-                                    value={formData.description}
-                                    onChange={handleChange}
-                                    rows={4}
-                                    required
-                                />
-                            </div>
+                  <Input
+                    id="userEmail"
+                    name="userEmail"
+                    type="email"
+                    value={session?.user.email ?? ""}
+                    readOnly
+                    placeholder="Not available yet"
+                    className="border-gray-700 bg-navy-card text-gray-400"
+                  />
+                </div>
+              </div>
 
-                            {/* User Information */}
-                            <div className="grid gap-5 rounded-lg border bg-muted/40 p-4 sm:grid-cols-2">
+              {/* Submit Button */}
+              <Button
+                type="submit"
+                className="w-full bg-emerald-primary text-base font-semibold text-navy transition hover:bg-emerald-hover"
+                size="lg"
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    Adding Book...
+                  </>
+                ) : (
+                  <>
+                    <BookOpen className="mr-2 h-5 w-5" />
+                    Add Book
+                  </>
+                )}
+              </Button>
 
-                                <div className="space-y-2">
-                                    <Label htmlFor="userName">User Name</Label>
+            </form>
+          </CardContent>
+        </Card>
 
-                                    <Input
-                                        id="userName"
-                                        name="userName"
-                                        value={session?.user.name ?? ""}
-                                        readOnly
-                                        placeholder="Not available yet"
-                                        className="bg-background"
-                                    />
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label htmlFor="userEmail">Email Address</Label>
-
-                                    <Input
-                                        id="userEmail"
-                                        name="userEmail"
-                                        type="email"
-                                        value={session?.user.email ?? ""}
-                                        readOnly
-                                        placeholder="Not available yet"
-                                        className="bg-background"
-                                    />
-                                </div>
-
-                            </div>
-
-                            {/* Submit Button */}
-                            <Button
-                                type="submit"
-                                className="w-full"
-                                size="lg"
-                                disabled={loading}
-                            >
-                                {loading ? (
-                                    <>
-                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                        Adding Book...
-                                    </>
-                                ) : (
-                                    <>
-                                        <BookOpen className="mr-2 h-4 w-4" />
-                                        Add Book
-                                    </>
-                                )}
-                            </Button>
-
-                        </form>
-                    </CardContent>
-                </Card>
-
-            </div>
-        </section>
-    );
+      </div>
+    </section>
+  );
 };
 
 export default AddBookPage;

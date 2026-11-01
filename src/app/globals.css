@@ -147,3 +147,13 @@
   width: 25px;
   border-radius: 10px;
 }
+
+@import "tailwindcss";
+
+@theme {
+  --color-navy: #111827;
+  --color-navy-dark: #0b1220;
+  --color-navy-card: #1f2937;
+  --color-emerald-primary: #10b981;
+  --color-emerald-hover: #059669;
+}

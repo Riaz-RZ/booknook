@@ -2,7 +2,6 @@
 import BookCard from "@/components/books/BookCard";
 import { Ibook } from "@/lib/types/books";
 
-
 const AllBooksPage = async () => {
   const res = await fetch("http://localhost:8000/books", {
     cache: "no-store",
@@ -13,9 +12,15 @@ const AllBooksPage = async () => {
   }
 
   const booksData: Ibook[] = await res.json();
+
   const newestFirst = [...booksData].sort((a, b) => {
-    const firstDate = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-    const secondDate = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+    const firstDate = a.createdAt
+      ? new Date(a.createdAt).getTime()
+      : 0;
+
+    const secondDate = b.createdAt
+      ? new Date(b.createdAt).getTime()
+      : 0;
 
     if (firstDate !== secondDate) {
       return secondDate - firstDate;
@@ -25,20 +30,25 @@ const AllBooksPage = async () => {
   });
 
   return (
-    <section className="min-h-screen bg-muted/30 px-4 py-12">
+    <section className="min-h-screen w-full bg-[#151F32] px-4 py-12 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
 
         {/* Page Heading */}
-        <div className="mb-10 text-center">
-          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            Explore Our Books
+        <div className="mb-12 text-center">
+          <p className="mb-3 text-sm font-semibold uppercase tracking-[0.2em] text-emerald-400">
+            Discover Your Next Read
+          </p>
+
+          <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
+            Explore Our{" "}
+            <span className="text-emerald-400">Books</span>
           </h1>
 
-          <p className="mt-3 text-muted-foreground">
+          <p className="mt-4 text-gray-400">
             Discover your next favorite book from our collection.
           </p>
 
-          <p className="mt-2 text-sm font-medium text-primary">
+          <p className="mt-3 text-sm font-semibold text-emerald-400">
             {newestFirst.length} Books Available
           </p>
         </div>
@@ -51,12 +61,12 @@ const AllBooksPage = async () => {
             ))}
           </div>
         ) : (
-          <div className="rounded-xl border border-dashed bg-background py-16 text-center">
-            <h2 className="text-xl font-semibold">
+          <div className="rounded-2xl border border-dashed border-gray-600 bg-navy-card px-4 py-16 text-center">
+            <h2 className="text-xl font-semibold text-white">
               No Books Found
             </h2>
 
-            <p className="mt-2 text-muted-foreground">
+            <p className="mt-2 text-gray-400">
               There are no books available at the moment.
             </p>
           </div>

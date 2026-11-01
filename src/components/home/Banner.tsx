@@ -1,15 +1,10 @@
-
 "use client";
 
 import Link from "next/link";
 import Image from "next/image";
 
 import { Swiper, SwiperSlide } from "swiper/react";
-import {
-  Autoplay,
-  Pagination,
-  EffectFade,
-} from "swiper/modules";
+import { Autoplay, Pagination, EffectFade } from "swiper/modules";
 
 import { ArrowRight } from "lucide-react";
 
@@ -43,13 +38,9 @@ const slides = [
 
 export default function Banner() {
   return (
-    <section className="mx-auto max-w-7xl px-4 pt-6 lg:px-8">
+    <section className="w-full">
       <Swiper
-        modules={[
-          Autoplay,
-          Pagination,
-          EffectFade,
-        ]}
+        modules={[Autoplay, Pagination, EffectFade]}
         effect="fade"
         fadeEffect={{ crossFade: true }}
         loop
@@ -60,19 +51,18 @@ export default function Banner() {
           pauseOnMouseEnter: true,
         }}
         pagination={{ clickable: true }}
-        className="booknook-slider overflow-hidden rounded-2xl"
+        className="booknook-slider w-full overflow-hidden"
       >
         {slides.map((slide, index) => (
           <SwiperSlide key={slide.title}>
-            <div className="relative flex min-h-105 items-center overflow-hidden md:min-h-130">
-
+            <div className="relative flex min-h-105 w-full items-center overflow-hidden md:min-h-130 lg:min-h-145">
               {/* Background Image */}
               <Image
                 src={slide.image}
                 alt={slide.title}
                 fill
                 priority={index === 0}
-                sizes="(max-width: 768px) 100vw, 1200px"
+                sizes="100vw"
                 className="object-cover"
               />
 
@@ -80,29 +70,28 @@ export default function Banner() {
               <div className="absolute inset-0 bg-black/55" />
 
               {/* Content */}
-              <div className="relative z-10 max-w-3xl px-8 py-16 text-white md:px-16">
+              <div className="relative z-10 mx-auto w-full max-w-7xl px-6 py-16 text-white md:px-12 lg:px-8">
+                <div className="max-w-3xl">
+                  <span className="mb-5 inline-block rounded-full border border-white/30 bg-white/10 px-4 py-2 text-xs font-semibold tracking-widest backdrop-blur-sm">
+                    {slide.subtitle}
+                  </span>
 
-                <span className="mb-5 inline-block rounded-full border border-white/30 bg-white/10 px-4 py-2 text-xs font-semibold tracking-widest backdrop-blur-sm">
-                  {slide.subtitle}
-                </span>
+                  <h1 className="mb-5 text-3xl font-bold leading-tight md:text-5xl lg:text-6xl">
+                    {slide.title}
+                  </h1>
 
-                <h1 className="mb-5 text-3xl font-bold leading-tight md:text-5xl lg:text-6xl">
-                  {slide.title}
-                </h1>
+                  <p className="mb-8 max-w-xl text-sm leading-7 text-white/90 md:text-base">
+                    {slide.description}
+                  </p>
 
-                <p className="mb-8 max-w-xl text-sm leading-7 text-white/90 md:text-base">
-                  {slide.description}
-                </p>
-
-                {/* Browse Books Button */}
-                <Link
-                  href="/books"
-                  className="inline-flex items-center gap-3 rounded-lg bg-white px-6 py-3 font-semibold text-emerald-800 shadow-lg transition-all hover:-translate-y-1 hover:bg-emerald-50"
-                >
-                  Browse Books
-                  <ArrowRight size={18} />
-                </Link>
-
+                  <Link
+                    href="/books"
+                    className="inline-flex items-center gap-3 rounded-lg bg-white px-6 py-3 font-semibold text-emerald-800 shadow-lg transition-all hover:-translate-y-1 hover:bg-emerald-50"
+                  >
+                    Browse Books
+                    <ArrowRight size={18} />
+                  </Link>
+                </div>
               </div>
             </div>
           </SwiperSlide>
