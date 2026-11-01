@@ -3,6 +3,7 @@ import { headers } from 'next/headers';
 import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
 import ReturnBorrowButton from '@/components/books/ReturnBorrowButton';
+import { getTokenFromServer } from '@/lib/getTokenFromServer';
 
 interface Borrow {
     _id: string;
@@ -27,8 +28,15 @@ const myBorrowsPage = async() => {
     })
 
     const user = session?.user
+
+
+    const token = await getTokenFromServer()
+
     const res = await fetch(`http://localhost:8000/borrows/${user?.email}`, {
         cache: 'no-store',
+        headers: {
+      authorization: `Bearer ${token}`,
+    }
     })
     const borrows: Borrow[] = res.ok ? await res.json() : []
 

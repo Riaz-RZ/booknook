@@ -1,6 +1,7 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
+import { getTokenFromClient } from '@/lib/getTokenFromClient'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
@@ -10,9 +11,12 @@ const ReturnBorrowButton = ({ borrowId }: { borrowId: string }) => {
 
     async function handleReturn() {
         setIsReturning(true)
-
+ const token = await getTokenFromClient()
         const res = await fetch(`http://localhost:8000/borrows/${borrowId}`, {
             method: 'DELETE',
+             headers: {
+                authorization: `Bearer ${token}`
+            },
         })
 
         if (!res.ok) {

@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import Image from "next/image";
 import BorrowBooksButton from "@/components/books/BorrowBooksButton";
+import { getTokenFromServer } from "@/lib/getTokenFromServer";
 
 interface BookDetailsPageProps {
   params: Promise<{
@@ -30,8 +31,15 @@ interface BookDetailsPageProps {
 const BookDetailsPage = async ({ params }: BookDetailsPageProps) => {
   const { id } = await params;
 
+
+  const token = await getTokenFromServer()
+
+
   const res = await fetch(`http://localhost:8000/book/${id}`, {
     cache: "no-store",
+    headers: {
+      authorization: `Bearer ${token}`,
+    }
   });
 
   if (!res.ok) {

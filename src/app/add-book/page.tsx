@@ -23,6 +23,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { authClient } from "@/lib/auth-client";
+import { getTokenFromClient } from "@/lib/getTokenFromClient";
 
 const AddBookPage = () => {
     const [loading, setLoading] = useState(false);
@@ -70,10 +71,13 @@ const AddBookPage = () => {
                 reader.readAsDataURL(imageFile);
             });
 
+            const token = await getTokenFromClient()
+
             const res = await fetch("http://localhost:8000/books", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
+                    authorization: `Bearer ${token}`
                 },
                 body: JSON.stringify({
                     ...formData,

@@ -2,6 +2,7 @@ import BookCard from "@/components/books/BookCard";
 import { Ibook } from "@/lib/types/books";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { getTokenFromServer } from "@/lib/getTokenFromServer";
 
 const myBooksPage = async () => {
     const session = await auth.api.getSession({
@@ -9,8 +10,14 @@ const myBooksPage = async () => {
     });
     const userEmail = session?.user.email?.toLowerCase();
 
+
+    const token = await getTokenFromServer()
+
     const res = await fetch("http://localhost:8000/books", {
         cache: "no-store",
+        headers: {
+            authorization: `Bearer ${token}`,
+        }
     });
 
     if (!res.ok) {
