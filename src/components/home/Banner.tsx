@@ -86,7 +86,7 @@ export default function Banner() {
 
                   <Link
                     href="/books"
-                    className="inline-flex items-center gap-3 rounded-lg bg-white px-6 py-3 font-semibold text-emerald-800 shadow-lg transition-all hover:-translate-y-1 hover:bg-emerald-50"
+                    className="inline-flex items-center gap-3 rounded-lg bg-emerald-primary px-6 py-3 font-semibold text-black shadow-lg transition-all hover:-translate-y-1 hover:bg-emerald-50"
                   >
                     Browse Books
                     <ArrowRight size={18} />
