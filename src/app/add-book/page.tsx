@@ -27,50 +27,6 @@ import {
 import { authClient } from "@/lib/auth-client";
 import { getTokenFromClient } from "@/lib/getTokenFromClient";
 
-const compressImage = async (file: File): Promise<string> => {
-  const bitmap = await createImageBitmap(file);
-  const maxDimension = 1200;
-  const scale = Math.min(1, maxDimension / Math.max(bitmap.width, bitmap.height));
-  const canvas = document.createElement("canvas");
-  canvas.width = Math.max(1, Math.round(bitmap.width * scale));
-  canvas.height = Math.max(1, Math.round(bitmap.height * scale));
-
-  const context = canvas.getContext("2d");
-  if (!context) {
-    bitmap.close();
-    throw new Error("Unable to prepare the selected image.");
-  }
-
-  context.fillStyle = "#ffffff";
-  context.fillRect(0, 0, canvas.width, canvas.height);
-  context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-  bitmap.close();
-
-  for (const quality of [0.82, 0.72, 0.62]) {
-    const blob = await new Promise<Blob>((resolve, reject) => {
-      canvas.toBlob(
-        (result) =>
-          result ? resolve(result) : reject(new Error("Unable to compress the image.")),
-        "image/jpeg",
-        quality
-      );
-    });
-
-    const image = await new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = () => reject(reader.error);
-      reader.readAsDataURL(blob);
-    });
-
-    if (blob.size <= 1_500_000) {
-      return image;
-    }
-  }
-
-  throw new Error("The image is too large even after compression.");
-};
-
 const AddBookPage = () => {
   const router = useRouter();
 
@@ -101,8 +57,44 @@ const AddBookPage = () => {
     }));
   };
 
+  // Handle image selection and validation
+  const handleImageChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = e.target.files?.[0];
+
+    if (!file) {
+      setImageFile(null);
+      return;
+    }
+
+    const allowedTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      toast.error("Only JPG, PNG and WEBP images are allowed.");
+      e.target.value = "";
+      setImageFile(null);
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image size must be less than 5 MB.");
+      e.target.value = "";
+      setImageFile(null);
+      return;
+    }
+
+    setImageFile(file);
+  };
+
   // Handle form submission
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (
+    e: React.FormEvent<HTMLFormElement>
+  ) => {
     e.preventDefault();
 
     if (!imageFile) {
@@ -115,18 +107,68 @@ const AddBookPage = () => {
       return;
     }
 
+    if (
+      !Number.isInteger(Number(formData.copies)) ||
+      Number(formData.copies) < 1
+    ) {
+      toast.error("Please enter a valid number of copies.");
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const image = await compressImage(imageFile);
-
+      // Get authentication token
       const token = await getTokenFromClient();
 
       if (!token) {
         throw new Error("Authentication token not found.");
       }
 
-      const res = await fetch(
+      // STEP 1: Prepare image for upload
+      const imageFormData = new FormData();
+
+      imageFormData.append("image", imageFile);
+
+      // STEP 2: Upload image to ImgBB through Express
+      const imageResponse = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/upload-image`,
+        {
+          method: "POST",
+          headers: {
+            authorization: `Bearer ${token}`,
+          },
+          body: imageFormData,
+        }
+      );
+
+      const imageResult = await imageResponse.json();
+
+      if (!imageResponse.ok) {
+        throw new Error(
+          imageResult.message || "Failed to upload book image."
+        );
+      }
+
+      // Get ImgBB image URL
+      const imageUrl = imageResult.imageUrl;
+
+      if (!imageUrl) {
+        throw new Error("ImgBB did not return an image URL.");
+      }
+
+      // STEP 3: Prepare book information
+      const bookData = {
+        ...formData,
+        copies: Number(formData.copies),
+        image: imageUrl,
+        userName: session.user.name,
+        userEmail: session.user.email,
+        addedAt: new Date(),
+      };
+
+      // STEP 4: Save book information in MongoDB
+      const bookResponse = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/books`,
         {
           method: "POST",
@@ -134,52 +176,24 @@ const AddBookPage = () => {
             "Content-Type": "application/json",
             authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({
-            ...formData,
-            copies: Number(formData.copies),
-            image,
-            userName: session.user.name,
-            userEmail: session.user.email,
-          }),
+          body: JSON.stringify(bookData),
         }
       );
 
-      if (!res.ok) {
-        const responseText = await res.text().catch(() => "");
-        let errorMessage = "";
+      const bookResult = await bookResponse.json();
 
-        if (responseText) {
-          try {
-            const errorData = JSON.parse(responseText);
-            errorMessage =
-              errorData?.message ||
-              errorData?.error ||
-              (typeof errorData === "string" ? errorData : "");
-          } catch {
-            errorMessage = responseText;
-          }
-        }
-
-        if (res.status === 401) {
-          throw new Error(
-            errorMessage ||
-              "Your session is not authorized. Please sign in again and retry."
-          );
-        }
-
+      if (!bookResponse.ok) {
         throw new Error(
-          errorMessage
-            ? `${errorMessage} (HTTP ${res.status})`
-            : `Failed to save the book (HTTP ${res.status}).`
+          bookResult.message || "Failed to save the book."
         );
       }
 
-      // Show success message
+      // STEP 5: Show success notification
       toast.success("Book added successfully!", {
         description: "Your book is now available in the library.",
       });
 
-      // Redirect to All Books page
+      // STEP 6: Redirect to All Books page
       router.push("/books");
       router.refresh();
 
@@ -304,7 +318,6 @@ const AddBookPage = () => {
                         category: value ?? "",
                       }))
                     }
-                    required
                   >
                     <SelectTrigger
                       id="category"
@@ -370,7 +383,7 @@ const AddBookPage = () => {
                   </span>
 
                   <span className="mt-2 text-sm text-gray-500">
-                    PNG, JPG or WEBP
+                    PNG, JPG or WEBP (Maximum 5 MB)
                   </span>
                 </label>
 
@@ -379,9 +392,7 @@ const AddBookPage = () => {
                   type="file"
                   accept="image/png,image/jpeg,image/webp"
                   className="hidden"
-                  onChange={(e) =>
-                    setImageFile(e.target.files?.[0] ?? null)
-                  }
+                  onChange={handleImageChange}
                 />
               </div>
 
@@ -445,7 +456,7 @@ const AddBookPage = () => {
                 disabled={loading || !session?.user}
                 size="lg"
                 className="
-                cursor-pointer
+                  cursor-pointer
                   h-12 w-full
                   bg-emerald-primary
                   text-base font-semibold text-navy
