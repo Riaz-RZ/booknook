@@ -1,6 +1,12 @@
 
 import BookCard from "@/components/books/BookCard";
 import { Ibook } from "@/lib/types/books";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "BookNook | All Books",
+  description: "Explore all available books in the BookNook library.",
+};
 
 const AllBooksPage = async () => {
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/books`, {

@@ -5,6 +5,13 @@ import HowBorrowingWorks from "@/components/home/HowBorrowingWorks";
 import ReaderReviews from "@/components/home/ReaderReviews";
 import NewArrivals from "@/components/home/NewArrivals";
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "BookNook | Home",
+  description: "Discover and explore your next favorite book.",
+};
+
 
 export default function Home() {
   return (

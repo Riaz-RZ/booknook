@@ -5,6 +5,12 @@ import { headers } from "next/headers";
 import { getTokenFromServer } from "@/lib/getTokenFromServer";
 import { BookOpen, LibraryBig, Sparkles } from "lucide-react";
 import MyBookCard from "@/components/books/MyBookCard";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "BookNook | My Books",
+  description: "Manage the books you have added to BookNook.",
+};
 
 const MyBooksPage = async () => {
   const session = await auth.api.getSession({

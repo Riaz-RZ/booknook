@@ -27,6 +27,12 @@ import {
     Library,
     Sparkles,
 } from "lucide-react";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "BookNook | My Borrows",
+  description: "View and manage your borrowed books.",
+};
 
 interface Borrow {
     _id: string;
