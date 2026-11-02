@@ -15,7 +15,7 @@ const ReturnBorrowButton = ({ borrowId }: { borrowId: string }) => {
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/borrows/${borrowId}`, {
             method: 'DELETE',
              headers: {
-                authorization: `Bearer ${token}`
+                authorization: `Bearer ${token}`,
             },
         })
 

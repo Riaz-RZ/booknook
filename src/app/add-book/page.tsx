@@ -27,6 +27,50 @@ import {
 import { authClient } from "@/lib/auth-client";
 import { getTokenFromClient } from "@/lib/getTokenFromClient";
 
+const compressImage = async (file: File): Promise<string> => {
+  const bitmap = await createImageBitmap(file);
+  const maxDimension = 1200;
+  const scale = Math.min(1, maxDimension / Math.max(bitmap.width, bitmap.height));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+  canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+
+  const context = canvas.getContext("2d");
+  if (!context) {
+    bitmap.close();
+    throw new Error("Unable to prepare the selected image.");
+  }
+
+  context.fillStyle = "#ffffff";
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  bitmap.close();
+
+  for (const quality of [0.82, 0.72, 0.62]) {
+    const blob = await new Promise<Blob>((resolve, reject) => {
+      canvas.toBlob(
+        (result) =>
+          result ? resolve(result) : reject(new Error("Unable to compress the image.")),
+        "image/jpeg",
+        quality
+      );
+    });
+
+    const image = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(blob);
+    });
+
+    if (blob.size <= 1_500_000) {
+      return image;
+    }
+  }
+
+  throw new Error("The image is too large even after compression.");
+};
+
 const AddBookPage = () => {
   const router = useRouter();
 
@@ -74,22 +118,7 @@ const AddBookPage = () => {
     setLoading(true);
 
     try {
-      // Convert image into Base64
-      const image = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-
-        reader.onload = () => {
-          if (typeof reader.result === "string") {
-            resolve(reader.result);
-          } else {
-            reject(new Error("Unable to read image."));
-          }
-        };
-
-        reader.onerror = () => reject(reader.error);
-
-        reader.readAsDataURL(imageFile);
-      });
+      const image = await compressImage(imageFile);
 
       const token = await getTokenFromClient();
 
@@ -116,9 +145,32 @@ const AddBookPage = () => {
       );
 
       if (!res.ok) {
-        const errorData = await res.json().catch(() => null);
+        const responseText = await res.text().catch(() => "");
+        let errorMessage = "";
+
+        if (responseText) {
+          try {
+            const errorData = JSON.parse(responseText);
+            errorMessage =
+              errorData?.message ||
+              errorData?.error ||
+              (typeof errorData === "string" ? errorData : "");
+          } catch {
+            errorMessage = responseText;
+          }
+        }
+
+        if (res.status === 401) {
+          throw new Error(
+            errorMessage ||
+              "Your session is not authorized. Please sign in again and retry."
+          );
+        }
+
         throw new Error(
-          errorData?.message || "Failed to save the book."
+          errorMessage
+            ? `${errorMessage} (HTTP ${res.status})`
+            : `Failed to save the book (HTTP ${res.status}).`
         );
       }
 
