@@ -1,43 +1,77 @@
-'use client'
 
-import { Button } from '@/components/ui/button'
-import { getTokenFromClient } from '@/lib/getTokenFromClient'
-import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+"use client";
 
-const ReturnBorrowButton = ({ borrowId }: { borrowId: string }) => {
-    const router = useRouter()
-    const [isReturning, setIsReturning] = useState(false)
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { getTokenFromClient } from "@/lib/getTokenFromClient";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
-    async function handleReturn() {
-        setIsReturning(true)
- const token = await getTokenFromClient()
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/borrows/${borrowId}`, {
-            method: 'DELETE',
-             headers: {
-                authorization: `Bearer ${token}`,
-            },
-        })
+interface ReturnBookButtonProps {
+    borrowId: string;
+}
 
-        if (!res.ok) {
-            setIsReturning(false)
-            return
+const ReturnBookButton = ({ borrowId }: ReturnBookButtonProps) => {
+    const [loading, setLoading] = useState(false);
+    const router = useRouter();
+
+    const handleReturn = async () => {
+        try {
+            setLoading(true);
+
+            const token = await getTokenFromClient();
+
+            const res = await fetch(
+                `${process.env.NEXT_PUBLIC_API_URL}/borrows/${borrowId}`,
+                {
+                    method: "DELETE",
+                    headers: {
+                        authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
+            const result = await res.json();
+
+            if (!res.ok) {
+                throw new Error(
+                    result.message || "Failed to return book."
+                );
+            }
+
+            toast.success("Book returned successfully!");
+
+            router.refresh();
+
+        } catch (error) {
+            toast.error(
+                error instanceof Error
+                    ? error.message
+                    : "Something went wrong."
+            );
+        } finally {
+            setLoading(false);
         }
-
-        router.refresh()
-    }
+    };
 
     return (
         <Button
-            type="button"
+            size="sm"
             variant="outline"
-            className="w-full"
-            disabled={isReturning}
             onClick={handleReturn}
+            disabled={loading}
         >
-            {isReturning ? 'Returning...' : 'Return'}
+            {loading ? (
+                <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Returning...
+                </>
+            ) : (
+                "Return Book"
+            )}
         </Button>
-    )
-}
+    );
+};
 
-export default ReturnBorrowButton
+export default ReturnBookButton;
