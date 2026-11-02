@@ -20,7 +20,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${josefinsans.className} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-[#111827] text-gray-100">
+      <body className="min-h-full flex flex-col bg-navy text-gray-100">
         <Toaster position="top-right" richColors />
         <Navbar />
         {children}

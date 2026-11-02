@@ -1,76 +1,120 @@
 
-"use client"
+"use client";
 
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import {
     Card,
     CardContent,
     CardDescription,
     CardHeader,
     CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
 import {
     Field,
     FieldDescription,
     FieldGroup,
     FieldLabel,
-} from "@/components/ui/field"
-import { Input } from "@/components/ui/input"
-import { authClient } from "@/lib/auth-client"
-import { useRouter } from "next/navigation"
-import { FormEvent, useState } from "react"
+} from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { authClient } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
+import { FormEvent, useState } from "react";
+import { toast } from "sonner";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function LogInPage() {
-    const router = useRouter()
-    const [formError, setFormError] = useState("")
-    const [isSubmitting, setIsSubmitting] = useState(false)
-    const [confirmPassword, setConfirmPassword] = useState("")
-    const [confirmPasswordError, setConfirmPasswordError] = useState("")
+    const router = useRouter();
+
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [confirmPasswordError, setConfirmPasswordError] = useState("");
+
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     async function handleEmailLogin(e: FormEvent<HTMLFormElement>) {
-        e.preventDefault()
-        setFormError("")
-        setIsSubmitting(true)
+        e.preventDefault();
 
-        const formData = new FormData(e.currentTarget)
-        const password = String(formData.get("password"))
+        setConfirmPasswordError("");
+        setIsSubmitting(true);
 
+        const formData = new FormData(e.currentTarget);
+
+        const email = String(formData.get("email")).trim();
+        const password = String(formData.get("password"));
+
+        // Confirm password validation
         if (password !== confirmPassword) {
-            setConfirmPasswordError("Passwords do not match.")
-            setIsSubmitting(false)
-            return
+            setConfirmPasswordError("Passwords do not match.");
+            toast.error("Password Mismatch", {
+                description: "Please enter the same password in both fields.",
+            });
+            setIsSubmitting(false);
+            return;
         }
 
-        setConfirmPasswordError("")
+        try {
+            const { error } = await authClient.signIn.email({
+                email,
+                password,
+            });
 
-        const { error } = await authClient.signIn.email({
-            email: String(formData.get("email")),
-            password,
-        })
+            if (error) {
+                toast.error("Login Failed", {
+                    description: error.message || "Invalid email or password.",
+                });
+                return;
+            }
 
-        if (error) {
-            setFormError(error.message ?? "Unable to log in.")
-            setIsSubmitting(false)
-            return
+            toast.success("Login Successful!", {
+                description: "Welcome back to BookNook.",
+            });
+
+            router.push("/");
+            router.refresh();
+
+        } catch {
+            toast.error("Something went wrong", {
+                description: "Please try again later.",
+            });
+        } finally {
+            setIsSubmitting(false);
         }
-
-        router.push("/")
-        router.refresh()
     }
 
     const handleGoogleSignIn = async () => {
-         await authClient.signIn.social({
-            provider: "google",
-        });
-    }
+        setIsGoogleLoading(true);
+
+        try {
+            const { error } = await authClient.signIn.social({
+                provider: "google",
+            });
+
+            if (error) {
+                toast.error("Google Sign-in Failed", {
+                    description: error.message || "Unable to sign in with Google.",
+                });
+                setIsGoogleLoading(false);
+            }
+        } catch {
+            toast.error("Something went wrong", {
+                description: "Please try Google sign-in again.",
+            });
+            setIsGoogleLoading(false);
+        }
+    };
 
     return (
         <main className="flex min-h-screen w-full items-center justify-center bg-[#151F32] px-4 py-12">
 
-            <Card className="mx-auto w-full max-w-lg border-gray-700 bg-navy-card shadow-xl">
+            <Card className="mx-auto w-full max-w-md border-gray-700 bg-navy-card shadow-2xl shadow-black/20">
 
                 <CardHeader className="space-y-2 text-center">
+
+                    {/* Logo */}
                     <div className="mx-auto mb-2 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400">
                         <span className="text-2xl">📚</span>
                     </div>
@@ -82,16 +126,21 @@ export default function LogInPage() {
                     <CardDescription className="text-gray-400">
                         Sign in to your BookNook account and continue your reading journey.
                     </CardDescription>
+
                 </CardHeader>
 
                 <CardContent>
+
                     <form noValidate onSubmit={handleEmailLogin}>
+
                         <FieldGroup className="gap-5">
 
+                            {/* Email */}
                             <Field>
                                 <FieldLabel htmlFor="email" className="text-gray-200">
                                     Email Address
                                 </FieldLabel>
+
                                 <Input
                                     id="email"
                                     type="email"
@@ -102,48 +151,79 @@ export default function LogInPage() {
                                 />
                             </Field>
 
+                            {/* Password */}
                             <Field>
                                 <FieldLabel htmlFor="password" className="text-gray-200">
                                     Password
                                 </FieldLabel>
-                                <Input
-                                    id="password"
-                                    type="password"
-                                    name="password"
-                                    placeholder="Enter your password"
-                                    required
-                                    className="border-gray-600 bg-navy text-white placeholder:text-gray-500 focus-visible:border-emerald-500"
-                                />
+
+                                <div className="relative">
+                                    <Input
+                                        id="password"
+                                        type={showPassword ? "text" : "password"}
+                                        name="password"
+                                        placeholder="Enter your password"
+                                        required
+                                        className="border-gray-600 bg-navy pr-10 text-white placeholder:text-gray-500 focus-visible:border-emerald-500"
+                                    />
+
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 transition hover:text-emerald-400"
+                                        aria-label={showPassword ? "Hide password" : "Show password"}
+                                    >
+                                        {showPassword ? (
+                                            <EyeOff className="h-4 w-4" />
+                                        ) : (
+                                            <Eye className="h-4 w-4" />
+                                        )}
+                                    </button>
+                                </div>
                             </Field>
 
+                            {/* Confirm Password */}
                             <Field>
                                 <FieldLabel htmlFor="confirmPassword" className="text-gray-200">
                                     Re-enter Password
                                 </FieldLabel>
-                                <Input
-                                    id="confirmPassword"
-                                    type="password"
-                                    name="confirmPassword"
-                                    placeholder="Confirm your password"
-                                    value={confirmPassword}
-                                    aria-invalid={Boolean(confirmPasswordError)}
-                                    onChange={(event) => {
-                                        const nextConfirmPassword = event.target.value
-                                        setConfirmPassword(nextConfirmPassword)
 
-                                        const passwordInput =
-                                            event.currentTarget.form?.elements.namedItem("password") as HTMLInputElement | null
+                                <div className="relative">
+                                    <Input
+                                        id="confirmPassword"
+                                        type={showConfirmPassword ? "text" : "password"}
+                                        name="confirmPassword"
+                                        placeholder="Confirm your password"
+                                        value={confirmPassword}
+                                        aria-invalid={Boolean(confirmPasswordError)}
+                                        onChange={(event) => {
+                                            const nextConfirmPassword = event.target.value;
+                                            setConfirmPassword(nextConfirmPassword);
 
-                                        if (
-                                            confirmPasswordError &&
-                                            nextConfirmPassword === passwordInput?.value
-                                        ) {
-                                            setConfirmPasswordError("")
-                                        }
-                                    }}
-                                    required
-                                    className="border-gray-600 bg-navy text-white placeholder:text-gray-500 focus-visible:border-emerald-500"
-                                />
+                                            const passwordInput =
+                                                event.currentTarget.form?.elements.namedItem("password") as HTMLInputElement | null;
+
+                                            if (nextConfirmPassword === passwordInput?.value) {
+                                                setConfirmPasswordError("");
+                                            }
+                                        }}
+                                        required
+                                        className="border-gray-600 bg-navy pr-10 text-white placeholder:text-gray-500 focus-visible:border-emerald-500"
+                                    />
+
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 transition hover:text-emerald-400"
+                                        aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                                    >
+                                        {showConfirmPassword ? (
+                                            <EyeOff className="h-4 w-4" />
+                                        ) : (
+                                            <Eye className="h-4 w-4" />
+                                        )}
+                                    </button>
+                                </div>
 
                                 {confirmPasswordError && (
                                     <p role="alert" className="text-sm text-red-400">
@@ -152,30 +232,38 @@ export default function LogInPage() {
                                 )}
                             </Field>
 
-                            {formError && (
-                                <p
-                                    role="alert"
-                                    className="rounded-md border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-400"
-                                >
-                                    {formError}
-                                </p>
-                            )}
-
+                            {/* Login and Google Buttons */}
                             <FieldGroup className="gap-3">
+
                                 <Field>
                                     <Button
                                         type="submit"
-                                        disabled={isSubmitting}
-                                        className="cursor-pointer w-full bg-emerald-primary font-semibold text-navy hover:bg-emerald-hover disabled:opacity-60"
+                                        disabled={isSubmitting || isGoogleLoading}
+                                        className="h-10 w-full cursor-pointer bg-emerald-primary font-semibold text-navy hover:bg-emerald-hover disabled:opacity-60"
                                     >
                                         {isSubmitting ? "Logging in..." : "Log In"}
                                     </Button>
 
+                                    {/* Divider */}
+                                    <div className="relative my-2">
+                                        <div className="absolute inset-0 flex items-center">
+                                            <span className="w-full border-t border-gray-700" />
+                                        </div>
+
+                                        <div className="relative flex justify-center text-xs uppercase">
+                                            <span className="bg-navy-card px-3 text-gray-500">
+                                                Or continue with
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    {/* Google Sign In */}
                                     <Button
                                         onClick={handleGoogleSignIn}
                                         variant="outline"
                                         type="button"
-                                        className="cursor-pointer w-full gap-3 border-gray-600 bg-white text-gray-800 hover:bg-gray-100 hover:text-gray-900"
+                                        disabled={isGoogleLoading || isSubmitting}
+                                        className="h-10 w-full cursor-pointer gap-3 border-gray-600 bg-white text-gray-800 hover:bg-gray-100 hover:text-gray-900 disabled:opacity-60"
                                     >
                                         <svg
                                             xmlns="http://www.w3.org/2000/svg"
@@ -187,9 +275,11 @@ export default function LogInPage() {
                                             <path fill="#FBBC05" d="M5.84 14.1A6.6 6.6 0 0 1 5.5 12c0-.73.13-1.43.34-2.1V7.06H2.15A11 11 0 0 0 1 12c0 1.78.43 3.46 1.15 4.94l3.69-2.84z" />
                                             <path fill="#EA4335" d="M12 5.36c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1a11 11 0 0 0-9.85 6.06L5.84 9.9C6.71 7.29 9.14 5.36 12 5.36z" />
                                         </svg>
-                                        Sign in with Google
+
+                                        {isGoogleLoading ? "Connecting..." : "Sign in with Google"}
                                     </Button>
 
+                                    {/* Register Link */}
                                     <FieldDescription className="pt-3 text-center text-gray-400">
                                         Don&apos;t have an account?{" "}
                                         <Link
@@ -199,13 +289,15 @@ export default function LogInPage() {
                                             Register
                                         </Link>
                                     </FieldDescription>
+
                                 </Field>
                             </FieldGroup>
 
                         </FieldGroup>
                     </form>
+
                 </CardContent>
             </Card>
         </main>
-    )
+    );
 }
