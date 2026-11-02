@@ -57,6 +57,7 @@ const ReturnBookButton = ({ borrowId }: ReturnBookButtonProps) => {
 
     return (
         <Button
+        className="cursor-pointer"
             size="sm"
             variant="outline"
             onClick={handleReturn}
